@@ -20,6 +20,24 @@
             android:name=".MainActivity"
             android:exported="false"/>
         <activity
+            android:name=".MotoActivity"
+            android:exported="false"/>
+        <activity
+            android:name=".BiciActivity"
+            android:exported="false"/>
+        <activity
+            android:name=".MonopatinEActivity"
+            android:exported="false"/>
+        <activity
+            android:name=".AccidenteActivity"
+            android:exported="false"/>
+        <activity
+            android:name=".SeguimientoActivity"
+            android:exported="false"/>
+        <activity
+            android:name=".MiSeguroActivity"
+            android:exported="false"/>
+        <activity
             android:name=".LoginActivity"
             android:exported="true" >
             <intent-filter>

@@ -14,7 +14,6 @@
         android:paddingTop="40dp"
         android:paddingHorizontal="16dp">
 
-        <!-- Icono de menú (decorativo) -->
         <ImageView
             android:id="@+id/menu_icon"
             android:layout_width="24dp"
@@ -32,11 +31,8 @@
             android:scaleType="centerCrop"
             android:src="@drawable/ipersona"
             android:clipToOutline="true"
-            android:outlineProvider="background"
-            />
+            android:outlineProvider="background" />
 
-
-        <!-- Texto Bienvenida -->
         <TextView
             android:id="@+id/welcome_text"
             android:layout_width="wrap_content"
@@ -49,9 +45,6 @@
             android:layout_marginTop="16dp" />
     </RelativeLayout>
 
-    <!-- Contenido sin ScrollView -->
-
-
     <LinearLayout
         android:id="@+id/linearLayout"
         android:layout_width="match_parent"
@@ -61,7 +54,6 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- Título -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -72,7 +64,6 @@
             android:textStyle="bold"
             android:layout_marginTop="8dp"/>
 
-        <!-- Cards de vehículos -->
         <GridLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -85,6 +76,7 @@
 
             <!-- Card 1: Motocicleta -->
             <LinearLayout
+                android:id="@+id/card_moto"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_columnWeight="1"
@@ -119,6 +111,7 @@
 
             <!-- Card 2: Bicicleta -->
             <LinearLayout
+                android:id="@+id/card_bici"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_columnWeight="1"
@@ -153,6 +146,7 @@
 
             <!-- Card 3: Monopatín -->
             <LinearLayout
+                android:id="@+id/card_monopatin"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_columnWeight="1"
@@ -161,8 +155,7 @@
                 android:orientation="vertical"
                 android:padding="8dp">
 
-
-            <ImageView
+                <ImageView
                     android:layout_width="match_parent"
                     android:layout_height="120dp"
                     android:background="@color/cardBlue"
@@ -189,7 +182,6 @@
 
     </LinearLayout>
 
-
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
         android:layout_width="match_parent"
@@ -200,7 +192,5 @@
         app:itemTextColor="@color/white"
         app:labelVisibilityMode="labeled"
         app:menu="@menu/bottom_nav_menu" />
-
-    <!-- Bottom Navigation -->
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

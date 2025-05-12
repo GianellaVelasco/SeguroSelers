@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/accidenteLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F5F8FC">
+
+    <!-- Header azul -->
+
+    <!-- Flecha y título -->
+    <View
+        android:id="@+id/header"
+        android:layout_width="0dp"
+        android:layout_height="70dp"
+        android:background="@color/primaryDark"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/backArrow"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/ivolver"
+        app:layout_constraintTop_toTopOf="@id/header"
+        app:layout_constraintBottom_toBottomOf="@id/header"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="16dp"/>
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Reportar Accidente"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toTopOf="@id/header"
+        app:layout_constraintBottom_toBottomOf="@id/header"
+        app:layout_constraintStart_toEndOf="@id/backArrow"
+        android:layout_marginStart="12dp"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
