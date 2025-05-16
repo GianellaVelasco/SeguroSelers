@@ -105,74 +105,55 @@
                 android:hint="Ingrese la patente"/>
 
             <!-- Fecha -->
-            <TextView android:text="Fecha" style="@style/LabelStyle"/>
-            <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp">
+            <TextView android:text="Fecha" style="@style/LabelStyle" />
 
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ifecha"
-                    android:contentDescription="Icono calendario"/>
-
-                <EditText
-                    android:id="@+id/editDia"
-                    style="@style/SmallInputStyle"
-                    android:inputType="number"
-                    android:hint="DD"/>
-
-                <EditText
-                    android:id="@+id/editMes"
-                    style="@style/SmallInputStyle"
-                    android:inputType="number"
-                    android:hint="MM"/>
-
-                <EditText
-                    android:id="@+id/editAnio"
-                    style="@style/YearInputStyle"
-                    android:inputType="number"
-                    android:hint="AAAA"/>
-
-            </LinearLayout>
-
-            <!-- Hora -->
             <LinearLayout
                 android:orientation="horizontal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
-                android:layout_marginTop="5dp"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ifecha"
+                    android:contentDescription="Icono calendario" />
+
+                <EditText
+                    android:id="@+id/editFecha"
+                    style="@style/SmallInputStyle"
+                    android:layout_width="173dp"
+                    android:layout_marginStart="8dp"
+                    android:focusable="false"
+                    android:hint="Seleccionar fecha" />
+            </LinearLayout>
+
+            <!-- Hora -->
+            <TextView android:text="Hora" style="@style/LabelStyle" />
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
                 android:gravity="center_vertical">
 
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:src="@drawable/ihora"
-                    android:layout_marginEnd="8dp"
-                    android:contentDescription="Icono reloj"/>
+                    android:contentDescription="Icono reloj" />
 
-                <Spinner
-                    android:id="@+id/spinnerHora"
-                    style="@style/TimeSpinnerStyle" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text=":"
-                    android:layout_marginHorizontal="4dp"/>
-
-                <Spinner
-                    android:id="@+id/spinnerMinuto"
-                    style="@style/TimeSpinnerStyle" />
-
-                <Spinner
-                    android:id="@+id/spinnerAmPm"
-                    style="@style/TimeSpinnerStyle"
-                    android:layout_marginStart="8dp"/>
+                <EditText
+                    android:id="@+id/editHora"
+                    style="@style/SmallInputStyle"
+                    android:layout_width="173dp"
+                    android:layout_marginStart="8dp"
+                    android:focusable="false"
+                    android:hint="Seleccionar hora" />
             </LinearLayout>
+
 
             <!-- Ubicación -->
             <TextView android:text="Ubicación" style="@style/LabelStyle"/>

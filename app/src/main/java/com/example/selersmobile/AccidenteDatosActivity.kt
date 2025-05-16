@@ -1,6 +1,8 @@
 package com.example.selersmobile
 
 import android.app.Activity
+import android.app.DatePickerDialog
+import android.app.TimePickerDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -10,22 +12,19 @@ import android.provider.MediaStore
 import android.view.View
 import android.widget.*
 import android.Manifest
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-
+import java.util.*
+import java.text.SimpleDateFormat
+import java.util.Locale
 class AccidenteDatosActivity : AppCompatActivity() {
     private lateinit var spinnerMarca: Spinner
     private lateinit var spinnerModelo: Spinner
     private lateinit var spinnerAnio: Spinner
-    private lateinit var spinnerHora: Spinner
-    private lateinit var spinnerMinuto: Spinner
-    private lateinit var spinnerAmPm: Spinner
     private lateinit var editPatente: EditText
-    private lateinit var editDia: EditText
-    private lateinit var editMes: EditText
-    private lateinit var editAnio: EditText
+    private lateinit var editFecha: EditText
+    private lateinit var editHora: EditText
     private lateinit var editUbicacion: EditText
     private lateinit var editTextDescription: EditText
     private lateinit var btnSiguiente: Button
@@ -49,13 +48,9 @@ class AccidenteDatosActivity : AppCompatActivity() {
         spinnerMarca = findViewById(R.id.spinnerMarca)
         spinnerModelo = findViewById(R.id.spinnerModelo)
         spinnerAnio = findViewById(R.id.spinnerAnio)
-        spinnerHora = findViewById(R.id.spinnerHora)
-        spinnerMinuto = findViewById(R.id.spinnerMinuto)
-        spinnerAmPm = findViewById(R.id.spinnerAmPm)
         editPatente = findViewById(R.id.editPatente)
-        editDia = findViewById(R.id.editDia)
-        editMes = findViewById(R.id.editMes)
-        editAnio = findViewById(R.id.editAnio)
+        editFecha = findViewById(R.id.editFecha)
+        editHora = findViewById(R.id.editHora)
         editUbicacion = findViewById(R.id.editUbicacion)
         editTextDescription = findViewById(R.id.editTextDescription)
         btnSiguiente = findViewById(R.id.btnSiguiente)
@@ -67,6 +62,9 @@ class AccidenteDatosActivity : AppCompatActivity() {
         imagePreview.visibility = View.VISIBLE
 
         cargarDatosEnSpinners()
+
+        editFecha.setOnClickListener { mostrarDatePicker() }
+        editHora.setOnClickListener { mostrarTimePicker() }
 
         btnSubirFoto.setOnClickListener {
             val intent = Intent(Intent.ACTION_PICK)
@@ -100,11 +98,33 @@ class AccidenteDatosActivity : AppCompatActivity() {
         title.text = "Datos del accidente con $tipoVehiculo"
     }
 
+    private fun mostrarDatePicker() {
+        val calendario = Calendar.getInstance()
+        val year = calendario.get(Calendar.YEAR)
+        val month = calendario.get(Calendar.MONTH)
+        val day = calendario.get(Calendar.DAY_OF_MONTH)
+
+        DatePickerDialog(this, { _, y, m, d ->
+            editFecha.setText(String.format("%02d/%02d/%04d", d, m + 1, y))
+        }, year, month, day).show()
+    }
+
+    private fun mostrarTimePicker() {
+        val calendario = Calendar.getInstance()
+        val hora = calendario.get(Calendar.HOUR_OF_DAY)
+        val minuto = calendario.get(Calendar.MINUTE)
+
+        TimePickerDialog(this, { _, h, m ->
+            val amPm = if (h >= 12) "PM" else "AM"
+            val h12 = if (h > 12) h - 12 else if (h == 0) 12 else h
+            editHora.setText(String.format("%02d:%02d %s", h12, m, amPm))
+        }, hora, minuto, false).show()
+    }
+
     private fun abrirCamara() {
         val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         startActivityForResult(intent, REQUEST_CAMARA)
     }
-
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
@@ -135,60 +155,25 @@ class AccidenteDatosActivity : AppCompatActivity() {
         val marcas = listOf("Seleccione una marca", "Toyota", "Ford", "Chevrolet", "Renault", "Volkswagen", "Fiat", "Honda")
         val modelos = listOf("Seleccione un modelo", "Corolla", "Focus", "Onix", "Clio", "Gol", "Cronos", "Civic")
         val anios = listOf("Seleccione un año") + (2019..2025).map { it.toString() }
-        val horas = listOf("HH") + (1..12).map { it.toString().padStart(2, '0') }
-        val minutos = listOf("MM", "00", "15", "30", "45")
-        val amPm = listOf("AM/PM", "AM", "PM")
 
         spinnerMarca.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, marcas)
         spinnerModelo.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, modelos)
         spinnerAnio.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, anios)
-        spinnerHora.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, horas)
-        spinnerMinuto.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, minutos)
-        spinnerAmPm.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, amPm)
     }
-
 
     private fun validarYEnviar() {
         val patente = editPatente.text.toString().trim()
-        val dia = editDia.text.toString().trim()
-        val mes = editMes.text.toString().trim()
-        val anioFecha = editAnio.text.toString().trim()
+        val fecha = editFecha.text.toString().trim()
+        val hora = editHora.text.toString().trim()
         val ubicacion = editUbicacion.text.toString().trim()
         val descripcion = editTextDescription.text.toString().trim()
 
-        // Validar campos vacíos
         if (patente.isEmpty()) {
             editPatente.error = "Ingrese la patente"
             editPatente.requestFocus()
             return
         }
-        if (dia.isEmpty()) {
-            editDia.error = "Ingrese el día"
-            editDia.requestFocus()
-            return
-        }
-        if (mes.isEmpty()) {
-            editMes.error = "Ingrese el mes"
-            editMes.requestFocus()
-            return
-        }
-        if (anioFecha.isEmpty()) {
-            editAnio.error = "Ingrese el año"
-            editAnio.requestFocus()
-            return
-        }
-        if (ubicacion.isEmpty()) {
-            editUbicacion.error = "Ingrese la ubicación"
-            editUbicacion.requestFocus()
-            return
-        }
-        if (descripcion.isEmpty()) {
-            editTextDescription.error = "Ingrese la descripción"
-            editTextDescription.requestFocus()
-            return
-        }
 
-        // Validación de patente argentina (vieja y nueva)
         val regexPatente = Regex("^[A-Z]{3}[0-9]{3}\$|^[A-Z]{2}[0-9]{3}[A-Z]{2}\$")
         if (!regexPatente.matches(patente)) {
             editPatente.error = "Patente inválida (ej: ABC123 o AB123CD)"
@@ -196,22 +181,40 @@ class AccidenteDatosActivity : AppCompatActivity() {
             return
         }
 
-        // Validación de fecha
-        val fechaValida = try {
-            val d = dia.toInt()
-            val m = mes.toInt()
-            val a = anioFecha.toInt()
-            d in 1..31 && m in 1..12 && a in 1900..2100
-        } catch (e: Exception) {
-            false
+        if (fecha.isEmpty()) {
+            editFecha.error = "Seleccione la fecha"
+            editFecha.requestFocus()
+            return
         }
-
-        if (!fechaValida) {
-            Toast.makeText(this, "Ingrese una fecha válida (dd/mm/aaaa)", Toast.LENGTH_SHORT).show()
+        // Validación de fecha no futura:
+        val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+        val fechaSeleccionada = sdf.parse(fecha)
+        val hoy = Calendar.getInstance().time
+        if (fechaSeleccionada != null && fechaSeleccionada.after(hoy)) {
+            editFecha.error = "La fecha no puede ser en el futuro"
+            editFecha.requestFocus()
             return
         }
 
-        // Validación de spinners
+
+        if (hora.isEmpty()) {
+            editHora.error = "Seleccione la hora"
+            editHora.requestFocus()
+            return
+        }
+
+        if (ubicacion.isEmpty()) {
+            editUbicacion.error = "Ingrese la ubicación"
+            editUbicacion.requestFocus()
+            return
+        }
+
+        if (descripcion.isEmpty()) {
+            editTextDescription.error = "Ingrese la descripción"
+            editTextDescription.requestFocus()
+            return
+        }
+
         if (spinnerMarca.selectedItemPosition == 0 ||
             spinnerModelo.selectedItemPosition == 0 ||
             spinnerAnio.selectedItemPosition == 0) {
@@ -219,19 +222,10 @@ class AccidenteDatosActivity : AppCompatActivity() {
             return
         }
 
-        if (spinnerHora.selectedItemPosition == 0 ||
-            spinnerMinuto.selectedItemPosition == 0 ||
-            spinnerAmPm.selectedItemPosition == 0) {
-            Toast.makeText(this, "Seleccione una hora válida", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        // Validación de foto
         if (imagenSeleccionadaUri == null && imagenTomada == null) {
             Toast.makeText(this, "Debe subir o tomar una foto del accidente", Toast.LENGTH_SHORT).show()
             return
         }
-
 
         irASiguientePantalla()
     }
@@ -242,8 +236,8 @@ class AccidenteDatosActivity : AppCompatActivity() {
             putExtra("modelo", spinnerModelo.selectedItem.toString())
             putExtra("anio", spinnerAnio.selectedItem.toString())
             putExtra("patente", editPatente.text.toString())
-            putExtra("fecha", "${editDia.text}/${editMes.text}/${editAnio.text}")
-            putExtra("hora", "${spinnerHora.selectedItem}:${spinnerMinuto.selectedItem} ${spinnerAmPm.selectedItem}")
+            putExtra("fecha", editFecha.text.toString())
+            putExtra("hora", editHora.text.toString())
             putExtra("ubicacion", editUbicacion.text.toString())
             putExtra("descripcion", editTextDescription.text.toString())
             imagenSeleccionadaUri?.let {
