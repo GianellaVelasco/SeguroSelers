@@ -231,7 +231,9 @@ class AccidenteDatosActivity : AppCompatActivity() {
     }
 
     private fun irASiguientePantalla() {
+        val tipoVehiculo = intent.getStringExtra("vehiculo")
         val intent = Intent(this, ConfirmarAccidenteActivity::class.java).apply {
+            putExtra("vehiculo", tipoVehiculo)
             putExtra("marca", spinnerMarca.selectedItem.toString())
             putExtra("modelo", spinnerModelo.selectedItem.toString())
             putExtra("anio", spinnerAnio.selectedItem.toString())
@@ -245,5 +247,5 @@ class AccidenteDatosActivity : AppCompatActivity() {
             }
         }
         startActivity(intent)
-    }
+        }
 }
