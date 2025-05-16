@@ -32,11 +32,18 @@
             android:name=".AccidenteActivity"
             android:exported="false"/>
         <activity
+            android:name=".AccidenteDatosActivity"
+            android:exported="false"/>
+        <activity
+            android:name=".ConfirmarAccidenteActivity"
+            android:exported="false"/>
+        <activity
             android:name=".SeguimientoActivity"
             android:exported="false"/>
         <activity
             android:name=".MiSeguroActivity"
             android:exported="false"/>
+
         <activity
             android:name=".LoginActivity"
             android:exported="true" >
