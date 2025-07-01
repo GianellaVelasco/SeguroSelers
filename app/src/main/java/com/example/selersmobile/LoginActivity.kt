@@ -22,79 +22,85 @@ class LoginActivity : AppCompatActivity() {
 
     // Simulamos un usuario registrado (en la vida real esto vendría de la base de datos)
     private val dummyEmail = "usuario@correo.com"
-    private val dummyPassword = "123456"
+    private val dummyPassword = "Hola123456"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
-        // Inicializamos las vistas
         emailInput = findViewById(R.id.email_input)
         passwordInput = findViewById(R.id.password_input)
         showPassword = findViewById(R.id.show_password)
         loginButton = findViewById(R.id.login_button)
         registerLink = findViewById(R.id.register_link)
 
-        // Configuración del botón para mostrar/ocultar la contraseña
+        // Inicializamos con contraseña oculta y ojo cerrado
+        passwordVisible = false
+        passwordInput.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+        showPassword.setImageResource(R.drawable.icerrado)
+
+        // Toggle mostrar/ocultar contraseña
         showPassword.setOnClickListener {
             passwordVisible = !passwordVisible
             if (passwordVisible) {
                 passwordInput.inputType = InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+                showPassword.setImageResource(R.drawable.iconoojo) // ojo abierto
             } else {
                 passwordInput.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+                showPassword.setImageResource(R.drawable.icerrado)  // ojo cerrado
             }
-            passwordInput.setSelection(passwordInput.text.length) // Para mantener el cursor al final
+            passwordInput.setSelection(passwordInput.text.length) // Mantener cursor al final
         }
 
-        // Configuración del botón de login
         loginButton.setOnClickListener {
             val email = emailInput.text.toString().trim()
             val password = passwordInput.text.toString()
 
-            // Validamos el login
             if (!isValidLogin(email, password)) return@setOnClickListener
 
-            // Si las credenciales son correctas, redirigimos al Home (MainActivity)
             if (email == dummyEmail && password == dummyPassword) {
                 Toast.makeText(this, "Bienvenido $email", Toast.LENGTH_SHORT).show()
                 startActivity(Intent(this, MainActivity::class.java))
-                finish() // Terminamos la actividad actual para que no se vuelva al login al presionar "atrás"
+                finish()
             } else {
-                Toast.makeText(this, "Correo o contraseña incorrectos", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Email o contraseña incorrectos. Por favor, revisá e intentá de nuevo.", Toast.LENGTH_LONG).show()
+                limpiarCampos()
             }
         }
 
-        // Enlace para redirigir a la pantalla de registro
         registerLink.setOnClickListener {
             startActivity(Intent(this, RegisterActivity::class.java))
         }
     }
 
-    // Función de validación de los campos
     private fun isValidLogin(email: String, password: String): Boolean {
-        // Validación de correo
-        if (email.isEmpty()) {
-            emailInput.error = "El correo es obligatorio"
+        if (email.isEmpty() || password.isEmpty()) {
+            Toast.makeText(this, "Campos incompletos. Revisá e intentá de nuevo.", Toast.LENGTH_SHORT).show()
+            limpiarCampos()
             emailInput.requestFocus()
             return false
         }
+
         if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            emailInput.error = "Correo inválido"
+            Toast.makeText(this, "El formato del correo electrónico no es válido. Por favor, ingresá una dirección válida.", Toast.LENGTH_LONG).show()
+            limpiarCampos()
             emailInput.requestFocus()
             return false
         }
-        // Validación de la contraseña
-        if (password.isEmpty()) {
-            passwordInput.error = "La contraseña es obligatoria"
-            passwordInput.requestFocus()
+
+        val passwordPattern = Regex("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$")
+        if (!passwordPattern.matches(password)) {
+            Toast.makeText(this, "La contraseña ingresada no es válida. Debe tener al menos 8 caracteres, incluir una mayúscula, una minúscula y un número.", Toast.LENGTH_LONG).show()
+            limpiarCampos()
+            emailInput.requestFocus()
             return false
         }
-        if (password.length < 6) {
-            passwordInput.error = "Mínimo 6 caracteres"
-            passwordInput.requestFocus()
-            return false
-        }
+
         return true
     }
 
+    private fun limpiarCampos() {
+        emailInput.text.clear()
+        passwordInput.text.clear()
+    }
 }

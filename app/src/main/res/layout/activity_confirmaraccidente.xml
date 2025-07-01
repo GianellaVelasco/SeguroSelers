@@ -136,7 +136,6 @@
         <include
             android:id="@+id/cardDescripcion"
             layout="@layout/card_item_dato" />
-
     </LinearLayout>
 
     <LinearLayout

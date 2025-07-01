@@ -18,6 +18,7 @@ import androidx.core.content.ContextCompat
 import java.util.*
 import java.text.SimpleDateFormat
 import java.util.Locale
+
 class AccidenteDatosActivity : AppCompatActivity() {
     private lateinit var spinnerMarca: Spinner
     private lateinit var spinnerModelo: Spinner
@@ -65,6 +66,10 @@ class AccidenteDatosActivity : AppCompatActivity() {
 
         editFecha.setOnClickListener { mostrarDatePicker() }
         editHora.setOnClickListener { mostrarTimePicker() }
+
+        // Evitar edición manual de hora, solo seleccionar con picker
+        editHora.isFocusable = false
+        editHora.isClickable = true
 
         btnSubirFoto.setOnClickListener {
             val intent = Intent(Intent.ACTION_PICK)
@@ -167,63 +172,86 @@ class AccidenteDatosActivity : AppCompatActivity() {
         val hora = editHora.text.toString().trim()
         val ubicacion = editUbicacion.text.toString().trim()
         val descripcion = editTextDescription.text.toString().trim()
+        val marcaValida = spinnerMarca.selectedItemPosition != 0
+        val modeloValido = spinnerModelo.selectedItemPosition != 0
+        val anioValido = spinnerAnio.selectedItemPosition != 0
+        val hayFoto = imagenSeleccionadaUri != null || imagenTomada != null
 
-        if (patente.isEmpty()) {
-            editPatente.error = "Ingrese la patente"
-            editPatente.requestFocus()
+        // Validación general de campos vacíos
+        if (patente.isEmpty() || fecha.isEmpty() || hora.isEmpty() || ubicacion.isEmpty() || descripcion.isEmpty()
+            || !marcaValida || !modeloValido || !anioValido || !hayFoto) {
+            Toast.makeText(this, "Campos incompletos. Revisá e intentá de nuevo.", Toast.LENGTH_LONG).show()
             return
         }
 
+        // Marca
+        if (!marcaValida) {
+            Toast.makeText(this, "Seleccioná una marca. Revisá e intentá de nuevo.", Toast.LENGTH_LONG).show()
+            return
+        }
+
+        // Modelo
+        if (!modeloValido) {
+            Toast.makeText(this, "Seleccioná un modelo. Revisá e intentá de nuevo.", Toast.LENGTH_LONG).show()
+            return
+        }
+
+        // Año
+        if (!anioValido) {
+            Toast.makeText(this, "Seleccioná un año. Revisá e intentá de nuevo.", Toast.LENGTH_LONG).show()
+            return
+        }
+
+        // Patente / Identificador
         val regexPatente = Regex("^[A-Z]{3}[0-9]{3}\$|^[A-Z]{2}[0-9]{3}[A-Z]{2}\$")
-        if (!regexPatente.matches(patente)) {
-            editPatente.error = "Patente inválida (ej: ABC123 o AB123CD)"
+        val regexIdentificador = Regex("^[A-Za-z0-9]{6,12}\$")
+
+        if (!regexPatente.matches(patente) && !regexIdentificador.matches(patente)) {
+            editPatente.error = "Ingresá un formato de patente válido (ej: ABC123 o AB123CD).\nO un identificador válido (6 a 12 caracteres alfanuméricos). Revisá e intentá de nuevo."
             editPatente.requestFocus()
             return
         }
 
-        if (fecha.isEmpty()) {
-            editFecha.error = "Seleccione la fecha"
-            editFecha.requestFocus()
-            return
-        }
-        // Validación de fecha no futura:
+        // Fecha
         val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-        val fechaSeleccionada = sdf.parse(fecha)
-        val hoy = Calendar.getInstance().time
-        if (fechaSeleccionada != null && fechaSeleccionada.after(hoy)) {
-            editFecha.error = "La fecha no puede ser en el futuro"
+        val fechaSeleccionada = try {
+            sdf.parse(fecha)
+        } catch (e: Exception) {
+            null
+        }
+
+        if (fechaSeleccionada == null || fechaSeleccionada.after(Calendar.getInstance().time)) {
+            editFecha.error = "Ingresá una fecha válida que no sea futura. Revisá e intentá de nuevo."
             editFecha.requestFocus()
             return
         }
 
+        // Hora
+        val regexHora = Regex("^(0[1-9]|1[0-2]):[0-5][0-9] (AM|PM)\$")
 
-        if (hora.isEmpty()) {
-            editHora.error = "Seleccione la hora"
+        if (!regexHora.matches(hora)) {
+            editHora.error = "Ingresá una hora válida. Revisá e intentá de nuevo."
             editHora.requestFocus()
             return
         }
 
+        // Ubicación
         if (ubicacion.isEmpty()) {
-            editUbicacion.error = "Ingrese la ubicación"
+            editUbicacion.error = "Complete el campo de ubicación. Revisá e intentá de nuevo."
             editUbicacion.requestFocus()
             return
         }
 
+        // Descripción
         if (descripcion.isEmpty()) {
-            editTextDescription.error = "Ingrese la descripción"
+            editTextDescription.error = "Complete el campo de descripción. Revisá e intentá de nuevo."
             editTextDescription.requestFocus()
             return
         }
 
-        if (spinnerMarca.selectedItemPosition == 0 ||
-            spinnerModelo.selectedItemPosition == 0 ||
-            spinnerAnio.selectedItemPosition == 0) {
-            Toast.makeText(this, "Seleccione marca, modelo y año del vehículo", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        if (imagenSeleccionadaUri == null && imagenTomada == null) {
-            Toast.makeText(this, "Debe subir o tomar una foto del accidente", Toast.LENGTH_SHORT).show()
+        // Imagen
+        if (!hayFoto) {
+            Toast.makeText(this, "Complete el campo de foto. Revisá e intentá de nuevo.", Toast.LENGTH_LONG).show()
             return
         }
 
@@ -247,5 +275,5 @@ class AccidenteDatosActivity : AppCompatActivity() {
             }
         }
         startActivity(intent)
-        }
+    }
 }

@@ -2,6 +2,7 @@ package com.example.selersmobile
 
 import android.app.AlertDialog
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,16 +11,19 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import java.text.SimpleDateFormat
+import java.util.*
 
 class ConfirmarAccidenteActivity : AppCompatActivity() {
 
+    private lateinit var sharedPreferences: SharedPreferences
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_confirmaraccidente)
 
+        sharedPreferences = getSharedPreferences("AccidentReportPrefs", MODE_PRIVATE)
         val btnCancelar = findViewById<Button>(R.id.btnCancelar)
         val btnGuardar = findViewById<Button>(R.id.btnGuardar)
-
 
         val marca = intent.getStringExtra("marca") ?: ""
         val modelo = intent.getStringExtra("modelo") ?: ""
@@ -43,6 +47,16 @@ class ConfirmarAccidenteActivity : AppCompatActivity() {
             // Generar ID aleatorio
             val idGestion = (100000..999999).random()
 
+            // Guardar los datos del reporte en SharedPreferences
+            val editor = sharedPreferences.edit()
+            editor.putBoolean("hasReport", true)
+            editor.putString("reportId", idGestion.toString())
+            editor.putString("vehicleType", tipoVehiculo)
+            editor.putString("reportDate", fecha)
+            editor.putString("reportStatus", "En curso") // Estado inicial
+            editor.apply()
+
+
             AlertDialog.Builder(this)
                 .setTitle("Gestión exitosa")
                 .setMessage("La gestión fue realizada con éxito.\nID de gestión: $idGestion")
@@ -55,7 +69,6 @@ class ConfirmarAccidenteActivity : AppCompatActivity() {
                 }
                 .show()
         }
-
 
         btnCancelar.setOnClickListener {
             AlertDialog.Builder(this)
@@ -103,65 +116,88 @@ class ConfirmarAccidenteActivity : AppCompatActivity() {
             botonGuardar.setOnClickListener {
                 val nuevoTexto = input.text.toString().trim()
 
-                if (titulo == "Tipo de Vehículo") {
-                    val valoresValidos = listOf("bicicleta", "monopatin", "motocicleta")
-                    if (!valoresValidos.contains(nuevoTexto.lowercase())) {
-                        input.error = "Solo se permite: bicicleta, monopatin o motocicleta"
-                        return@setOnClickListener
+                // Validaciones comunes para campos vacíos
+                if (nuevoTexto.isEmpty()) {
+                    val mensajeVacio = when(titulo) {
+                        "Marca" -> "Seleccioná una marca. Revisá e intentá de nuevo."
+                        "Modelo" -> "Seleccioná un modelo. Revisá e intentá de nuevo."
+                        "Año" -> "Seleccioná un año. Revisá e intentá de nuevo."
+                        "Patente" -> "Complete el campo de patente/identificador. Revisá e intentá de nuevo."
+                        "Fecha" -> "Seleccioná una fecha. Revisá e intentá de nuevo."
+                        "Hora" -> "Seleccioná una hora. Revisá e intentá de nuevo."
+                        "Ubicación" -> "Complete el campo de ubicación. Revisá e intentá de nuevo."
+                        "Descripción" -> "Complete el campo de descripción. Revisá e intentá de nuevo."
+                        else -> "Complete el campo. Revisá e intentá de nuevo."
                     }
+                    input.error = mensajeVacio
+                    return@setOnClickListener
                 }
-                // Validación personalizada
-                val esValido = when (titulo) {
+
+                // Validaciones específicas por campo
+                when(titulo) {
+                    "Tipo de Vehículo" -> {
+                        val valoresValidos = listOf("bicicleta", "monopatin", "motocicleta")
+                        if (!valoresValidos.contains(nuevoTexto.lowercase())) {
+                            input.error = "Solo se permite: bicicleta, monopatin o motocicleta"
+                            return@setOnClickListener
+                        }
+                    }
                     "Marca", "Modelo", "Ubicación", "Descripción" -> {
-                        if (nuevoTexto.isEmpty()) {
-                            input.error = "$titulo no puede estar vacío"
-                            false
-                        } else true
+                        // Ya validado que no está vacío arriba, nada más
                     }
                     "Año" -> {
                         if (!nuevoTexto.matches(Regex("\\d{4}"))) {
-                            input.error = "Ingrese un año válido de 4 dígitos"
-                            false
+                            input.error = "Seleccioná un año. Revisá e intentá de nuevo."
+                            return@setOnClickListener
                         } else {
                             val anio = nuevoTexto.toInt()
                             if (anio < 1900 || anio > 2100) {
-                                input.error = "El año debe estar entre 1900 y 2100"
-                                false
-                            } else true
+                                input.error = "Seleccioná un año. Revisá e intentá de nuevo."
+                                return@setOnClickListener
+                            }
                         }
                     }
                     "Patente" -> {
-                        val patenteRegex = Regex("^(?:[A-Z]{2}\\d{3}[A-Z]{2}|[A-Z]{3}\\d{3})$")
-                        if (!nuevoTexto.matches(patenteRegex)) {
-                            input.error = "Formato de patente inválido"
-                            false
-                        } else true
+                        val regexPatente = Regex("^[A-Z]{3}[0-9]{3}\$|^[A-Z]{2}[0-9]{3}[A-Z]{2}\$")
+                        val regexIdentificador = Regex("^[A-Za-z0-9]{6,12}\$")
+                        if (!regexPatente.matches(nuevoTexto) && !regexIdentificador.matches(nuevoTexto)) {
+                            input.error = "Ingresá un formato de patente válido (ej: ABC123 o AB123CD) o un identificador válido (6 a 12 caracteres alfanuméricos). Revisá e intentá de nuevo."
+                            return@setOnClickListener
+                        }
                     }
                     "Fecha" -> {
                         val fechaRegex = Regex("^\\d{2}/\\d{2}/\\d{4}\$")
-                        if (!nuevoTexto.matches(fechaRegex)) {
-                            input.error = "Formato de fecha inválido (ej: 12/09/2024)"
-                            false
-                        } else true
+                        if (!fechaRegex.matches(nuevoTexto)) {
+                            input.error = "Ingresá una fecha válida que no sea futura. Revisá e intentá de nuevo."
+                            return@setOnClickListener
+                        }
+                        // Validar no sea futura
+                        val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                        val fechaSeleccionada = try {
+                            sdf.parse(nuevoTexto)
+                        } catch (e: Exception) {
+                            null
+                        }
+                        if (fechaSeleccionada == null || fechaSeleccionada.after(Calendar.getInstance().time)) {
+                            input.error = "Ingresá una fecha válida que no sea futura. Revisá e intentá de nuevo."
+                            return@setOnClickListener
+                        }
                     }
                     "Hora" -> {
-                        val horaRegex = Regex("^([01]\\d|2[0-3]):[0-5]\\d\$")
-                        if (!nuevoTexto.matches(horaRegex)) {
-                            input.error = "Formato de hora inválido (ej: 14:30)"
-                            false
-                        } else true
+                        val regexHora = Regex("^(0[1-9]|1[0-2]):[0-5][0-9] (AM|PM)\$")
+                        if (!regexHora.matches(nuevoTexto)) {
+                            input.error = "Ingresá una hora válida. Revisá e intentá de nuevo."
+                            return@setOnClickListener
+                        }
                     }
-                    else -> true
                 }
 
-                if (esValido) {
-                    textViewParaActualizar.text = nuevoTexto
-                    dialog.dismiss()
-                }
+                // Si pasó todas las validaciones
+                textViewParaActualizar.text = nuevoTexto
+                dialog.dismiss()
             }
         }
 
         dialog.show()
     }
-
 }
